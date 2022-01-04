@@ -1,13 +1,16 @@
 from tkinter import *
 import tkinter as tk
 from tkinter import ttk
-from tkinter import messagebox, filedialog
+from tkinter import filedialog
+from Socket import Socket
 import subprocess
 import FormatareFisier
 from info_interfata import *
 
 
 class Interfata:
+    port = [0, 0]
+    ip = [0,0]
 
     def __init__(self):
         #interfata
@@ -127,13 +130,29 @@ class Interfata:
         self.buton_start.place(x=310, y=310)
         self.buton_stop.place(x=630,y=310)
 
-    @staticmethod
-    def call_start():
-        info_interfata.check_port(info_interfata.port_sender)
-        info_interfata.check_port(info_interfata.port_reciever)
-        info_interfata.alcatuit_cifre(info_interfata.threshold)
-        info_interfata.alcatuit_cifre(info_interfata.prob_pierdere)
-        info_interfata.alcatuit_cifre(info_interfata.dim_pachete)
+    def call_start(self):
+
+        p1 = self.text_port_sender.get()
+        if info_interfata.check_port(p1):
+            Interfata.port[0] = p1
+        else:
+            self.text_port_sender.delete(0, END)
+            return
+        #
+        p2 = self.text_port_reciever.get()
+        if info_interfata.check_port(p2):
+            nr2 = p2
+            Interfata.port[1] = nr2
+        else:
+            self.text_port_reciever.delete(0, END)
+            return
+
+        Interfata.ip[0] = self.text_ip_sender.get()
+        Interfata.ip[1] = self.text_ip_reciever.get()
+
+        Socket.initializare()
+
+
 
 
     def start_interface(self):

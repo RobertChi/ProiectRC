@@ -1,5 +1,4 @@
-import Socket as s_c
-
+import Threaduri_Sender as ts
 
 class Tahoe_Algoritm:
     prag = 30 # sstresh de la care voi incepe sa cresc liniar dim ferestrei
@@ -25,13 +24,13 @@ class Tahoe_Algoritm:
     def trimiterea_rapida():
         # print pentru debug
         print('Am intrat in trimitere')
-        print('timp_asteptare='+str(s_c.Thread_Primire.timp_asteptare[0]))
-        print(s_c.Thread_Primire.ultima_ACK)
+        print('timp_asteptare='+str(ts.Thread_Primire.timp_asteptare[0]))
+        print(ts.Thread_Primire.ultima_ACK)
         # verfic conditiile pentru existenta congestie
-        if (s_c.Thread_Primire.timp_asteptare[0] > Tahoe_Algoritm.timp_asteptare) or (s_c.Thread_Primire.ultima_ACK[0] == 3):
+        if (ts.Thread_Primire.timp_asteptare[0] > Tahoe_Algoritm.timp_asteptare) or (ts.Thread_Primire.ultima_ACK[0] == 3):
             # am detectat congestia
             # modific timpul de asteptare
-            s_c.Thread_Primire.timp_asteptare.insert(0, 0)
+            ts.Thread_Primire.timp_asteptare.insert(0, 0)
             # modific pragul ca fiind jumatate din dimensiunea ferestrei la care s-a ajuns
             # acum, fac acest lucru doar daca dim ferestrei >1
             if( Tahoe_Algoritm.cwnd > 1 ):
@@ -55,8 +54,8 @@ class Tahoe_Algoritm:
             # modific flag pentru partea de determinare a congestiei
             Tahoe_Algoritm.stop_Thread = True
             # resetez datele din coada
-            s_c.Thread_Primire.ultima_ACK[0] = 0
-            s_c.Thread_Primire.ultima_ACK[1] = ' '
+            ts.Thread_Primire.ultima_ACK[0] = 0
+            ts.Thread_Primire.ultima_ACK[1] = ' '
             # am determinat congestia
             return True
         # in cazul in care nu am detectat congestia

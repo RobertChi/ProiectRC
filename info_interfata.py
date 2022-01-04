@@ -23,7 +23,6 @@ class info_interfata:
         self.ip_sender=Interfata.text_ip_sender.get()
         self.ip_reciever=Interfata.text_ip_reciever.get()
 
-
     @staticmethod
     def check_port(sir):
         # verificam daca prima cifra a portului e diferita de 0
@@ -32,7 +31,10 @@ class info_interfata:
             messagebox.showinfo('Error', s)
             return False
         # verificam sa fie alcatuit doar din cifre, nu si litere
-        info_interfata.alcatuit_cifre(sir)
+        if info_interfata.alcatuit_cifre(sir):
+            return True
+        else:
+            return False
 
     @staticmethod
     def alcatuit_cifre(sir):
