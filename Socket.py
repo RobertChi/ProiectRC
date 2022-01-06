@@ -19,3 +19,4 @@ class Socket:
 
         port = int(it.Interfata.port[0])
         Socket.UDPServerSocket.bind((it.Interfata.ip[0], port))
+        #TODO start threaduri

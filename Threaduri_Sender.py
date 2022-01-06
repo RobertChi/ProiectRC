@@ -9,7 +9,9 @@ from Socket import Socket
 
 
 class Thread_Trimitere(Thread):
-    stare_trimitere = Condition()  # variabila de conditie pentru comunicarea prin socket
+    # variabila de conditie pentru comunicarea prin socket
+    stare_trimitere = Condition()
+
     def __init__(self):
         # apelez constructorul din clasa parinte
         super(Thread_Trimitere, self).__init__()
@@ -20,8 +22,7 @@ class Thread_Trimitere(Thread):
             # primesc lock
             Thread_Trimitere.stare_trimitere.acquire()
             coada_trimis = [] # coada in care voi pune pachetele de trimis
-                # daca cele doua cozi din care pot lua pachete spre a fi trimise sunt
-                # vide astept
+                # daca cele doua cozi din care pot lua pachete spre a fi trimise sunt vide astept
             if (len(ff.Thread_Prelucrare.coada_pachete) == 0) and len(ta.Tahoe_Algoritm.coada_pachete_retransmise) == 0:
                 Thread_Trimitere.stare_trimitere.wait()
             # daca nu am elemente in coada de retransmisie si toate pachetele trimise
@@ -32,7 +33,7 @@ class Thread_Trimitere(Thread):
                 # scot primul pachet si verific daca este de tip start/ stop
                 p = ff.Thread_Prelucrare.coada_pachete[0]
                 # daca da, il trimit direct, fara sa ma uit la cwnd si fara sa il pun in coada
-                if p[0] == '*':
+                if p[0] == 'S':
                     # il scot din coada
                     s = ff.Thread_Prelucrare.coada_pachete.pop(0)
                     # trimit
@@ -42,11 +43,11 @@ class Thread_Trimitere(Thread):
 
                     # mai intai verific daca in coada nu sunt mai putine pachete decat dim
                 if len(ff.Thread_Prelucrare.coada_pachete) < ta.Tahoe_Algoritm.cwnd:
-                    print('cazul in care am mai putine')
-                            # le trimit pe toate
+                    #cazul in care am mai putine le trimit pe toate
                     for i in range(0, len(ff.Thread_Prelucrare.coada_pachete)):
                         # verific sa nu fie pachetul de start sau stop
-                        if (ff.Thread_Prelucrare.coada_pachete[0][0] !='*'):
+                        #TODO VERIFICA
+                        if (ff.Thread_Prelucrare.coada_pachete[0][0] !='S'):
                             # le scot din coada de pachete
                             p = ff.Thread_Prelucrare.coada_pachete.pop(0)
                             # le adaug in coada de trimis si in coada de pachete neconfirmate
@@ -56,7 +57,7 @@ class Thread_Trimitere(Thread):
                             # scot din coada doar cwnd pachete
                     for i in range(0, ta.Tahoe_Algoritm.cwnd):
                         # verific sa nu fie pachetul de start sau stop
-                        if (ff.Thread_Prelucrare.coada_pachete[0][0] != '*'):
+                        if (ff.Thread_Prelucrare.coada_pachete[0][0] != 'S'):
                             # la fel le scot din coada de pachete, le pun in coada de trimis
                             # si in cea de pachete neconfirmate
                             p = ff.Thread_Prelucrare.coada_pachete.pop(0)
@@ -67,50 +68,45 @@ class Thread_Trimitere(Thread):
                 for i in range(0, len(coada_trimis)):
                     # scot din coada
                     string = coada_trimis.pop(0)
-                    print("Am trimis " + string)
                     # trimit pe socket
                     Socket.UDPServerSocket.sendto(bytearray(string.encode('utf-8')),(it.Interfata.ip[1], port))
-                print('Coada de pachete neconfirmate')
-                print(ta.Tahoe_Algoritm.coada_pachete_neconfirmate)
-            # in cazul in care am elemente in coada de retransmisie si pachetele deja trimise
-            # au primit ACK, trimit pachetele din coada de retransmisie
+                    #TODO Afisare in caseta text sender
+
+            # in cazul in care am elemente in coada de retransmisie si pachetele deja trimise au primit ACK, trimit pachetele din coada de retransmisie
             elif len(ta.Tahoe_Algoritm.coada_pachete_neconfirmate) == 0 and len(ta.Tahoe_Algoritm.coada_pachete_retransmise) != 0:
-                print('Trimit din retransmise')
+                #trimitem din coada de retransimisie
                 if len(ta.Tahoe_Algoritm.coada_pachete_retransmise) == 1:
                     # trimit direct
                     p = ta.Tahoe_Algoritm.coada_pachete_retransmise.pop(0)
                     coada_trimis = coada_trimis + [p]
                     ta.Tahoe_Algoritm.coada_pachete_neconfirmate = ta.Tahoe_Algoritm.coada_pachete_neconfirmate + [p]
 
-                if len(ta.Tahoe_Algoritm.coada_pachete_retransmise) < ta.Tahoe_Algoritm.cwnd:
-                     print('cazul in care am mai putine')
-            # le trimit pe toate
+                # cazul in care am mai putine
+                if len(ta.Tahoe_Algoritm.coada_pachete_retransmise) <= ta.Tahoe_Algoritm.cwnd:
+                     # le trimit pe toate
                      for i in range(0,len(ta.Tahoe_Algoritm.coada_pachete_retransmise)):
                         p = ta.Tahoe_Algoritm.coada_pachete_retransmise.pop(0)
                         coada_trimis = coada_trimis + [p]
                         ta.Tahoe_Algoritm.coada_pachete_neconfirmate = ta.Tahoe_Algoritm.coada_pachete_neconfirmate + [p]
 
                 else:
-                    print('coada de retransmisie')
-                    print(ta.Tahoe_Algoritm.coada_pachete_retransmise)
                     # scot din coada doar cwnd pachete
                     for i in range(0, ta.Tahoe_Algoritm.cwnd):
                         p = ta.Tahoe_Algoritm.coada_pachete_retransmise.pop(0)
                         coada_trimis = coada_trimis + [p]
                         ta.Tahoe_Algoritm.coada_pachete_neconfirmate = ta.Tahoe_Algoritm.coada_pachete_neconfirmate + [p]
-                print("coada de trimis")
-                print(coada_trimis)
+
+
                 port = it.Interfata.port[1]
+                #trimitem din coada de trimis
                 for i in range(0, len(coada_trimis)):
                     string = coada_trimis.pop(0)
-                    print("Am trimis " + string)
                     Socket.UDPServerSocket.sendto(bytearray(string.encode('utf-8')),(it.Interfata.ip[1], port))
+                    #TODO afisare caseta sender (string)
 
-                # ta.Tahoe_Algoritm.coada_pachete_retransmise=[]
+                #daca coada de retransimisie este nula
                 if len(ta.Tahoe_Algoritm.coada_pachete_retransmise) == 0:
                     ta.Tahoe_Algoritm.stop_Thread = False
-                print('Coada de pachete neconfirmate')
-                print(ta.Tahoe_Algoritm.coada_pachete_neconfirmate)
                 # eliberez lock
             Thread_Trimitere.stare_trimitere.release()
 
@@ -139,7 +135,7 @@ class Thread_Primire(Thread):
 
             # Apelam la functia sistem IO -select- pentru a verifca daca socket-ul are date in bufferul de receptie
             # Stabilim un timeout de 1 secunda
-            r, _, _ = select.select([Socket.UDPServerSocket], [], [], 1)
+            r = select.select([Socket.UDPServerSocket], [], [], 1)
             if not r:
                 # incrementez un contor care sa imi spuna cat am asteptat pana am primit ceva
                 contor = contor + 1
@@ -149,16 +145,15 @@ class Thread_Primire(Thread):
                 # preia data primita ca fiind string
                 sir=str(data)
                 # prelucrez informatia, tiind cont de formatul ei de pe socket
-                sir = sir.split('%')
+                sir = sir.split('|')
                 sir = sir[1]
                 # actualizez pe interfata
-                self.interfata.update_label_ACK(sir)
+                self.interfata.update_label_ACK(sir)  # TODO schimba sa afiseze ACKURILE in fereastra senderului
                 # pentru partea de ACK duplicat
                 partea_ACK_duplicat(sir)
                 # verific daca nu am retransmisie
                 ta.Tahoe_Algoritm.trimiterea_rapida()
                 # pun in coada de prelucrare
-
                 Thread_Primire.coada_ACK=Thread_Primire.coada_ACK + [sir]
                 # dau lock thread-ul de prelucrare de ACK
                 Thread_Prelucrare_ACK.stare_prelucrare_ACK.acquire()
@@ -168,15 +163,15 @@ class Thread_Primire(Thread):
                 Thread_Prelucrare_ACK.stare_prelucrare_ACK.release()
                 # resetez contorul de timp
                 Thread_Primire.timp_asteptare.insert(0, contor)
-                print('data= '+ sir )
             # eliberez lock
             Thread_Primire.stare_primire.release()
 
 class Thread_Prelucrare_ACK(Thread):
-    stare_prelucrare_ACK = Condition() # var de cond pentru sincronizare thread
+    # var de cond pentru sincronizare thread
+    stare_prelucrare_ACK = Condition()
 
     def __init__(self):
-        # apelez constructorul din clada parinte
+        # apelez constructorul din clasa parinte
         super(Thread_Prelucrare_ACK, self).__init__()
 
     def run(self):
@@ -215,9 +210,7 @@ class Thread_Prelucrare_ACK(Thread):
 
 
 def partea_ACK_duplicat(sir):
-    print('Am intrat in ACK duplicat')
-    # verific daca am primit de  mai multe ori confirmare pentru un pachet, incrementez
-    # un contor
+    # verific daca am primit de  mai multe ori confirmare pentru un pachet, incrementez un contor
     if ff.FormatareFisier.siruri_egale(Thread_Primire.ultima_ACK[1], sir):
         # daca aceasta exista deja, atunci incrementez contorul
         Thread_Primire.ultima_ACK[0] = Thread_Primire.ultima_ACK[0]+1

@@ -25,6 +25,7 @@ class FormatareFisier:
 
         #salvam textul
         FormatareFisier.text=text
+        return text
 
     @staticmethod
     #functie care imparte textul in mai multe bucati
@@ -32,54 +33,52 @@ class FormatareFisier:
 
         #variabile
         dim=FormatareFisier.dimensiune_sir
-        l_text=len(text)
-        k=1
+        coada_pachete=[]
 
-        for i in range(0, l_text, dim):
+
+        for i in range(0, len(text), dim):
             #daca nu se imparte exact dimensiunea fisierului cu dimensiunea pachetului facem ultimul sir cu cate caractere au mai ramas
-            if(i+dim>l_text):
-                sir=text[i:l_text]
+            if(i+dim>len(text)):
+                sir=text[i:len(text)]
             else:
                 sir=text[i:i+dim]
 
             #salvam sirul in coada de pachete pe pozitia k
-            FormatareFisier.coada_pachete[k]=sir
+            coada_pachete.append(sir)
 
-            #incrementam pozitia in coada
-            k+=1
+        return coada_pachete
 
     @staticmethod
     #functie care realizeaza formatarea pachetelor (nr. secventa + sir caractere)
-    def format_file():
+    def format_file(text):
 
         #apelam functia de citire fisier
-        FormatareFisier.read_file(FormatareFisier.cale_fisier)
-
-        #apelam functia de split dupa dimensiune
-        FormatareFisier.split_file(FormatareFisier.text)
+        coada_pachete=FormatareFisier.split_file(text)
+        FormatareFisier.coada_pachete=coada_pachete
 
         #vom folosi un vector intermediar pentru a edita coada de pachete
-        vector=FormatareFisier.coada_pachete
-        for k in range(0,len(vector),1):
+        i=1
+        vector=[]
+        for k in coada_pachete:
             #adaugam un separator pentru a fi mai usoara separarea de catre reciever
-            vector[k+1]=k+'|'+vector[k+1]
-
+            sir=(str)(i)+'|'+k
+            vector.append(sir)
         #salvam coada de pachete formatata
-        FormatareFisier.coada_pachete=vector
+        return vector
 
     @staticmethod
     #functie care adauga cozii de pachete un pachet de inceput si unul de sfarsit
-    def add_ends():
-
-        #pachetul de inceput va contine numarul de pachete de transmis si cuvantul START
-        pachet_start='START'+'|'+len(FormatareFisier.coada_pachete)
-
-        #pachetul de final va contine cuvantul STOP si numarul de caractere transmise
-        pachet_stop='STOP'+'|'+len(FormatareFisier.text)
+    def add_ends(f):
+        if f==1:
+            #pachetul de inceput va contine numarul de pachete de transmis si cuvantul START
+            p='START'+'|'+(str)(len(FormatareFisier.coada_pachete))
+        else:
+            #pachetul de final va contine cuvantul STOP si numarul de caractere transmise
+            p='STOP'+'|'+(str)(len(FormatareFisier.text))
 
         #adaugam pachetele de start si stop la coada de pachete pentru a fi transmise
-        FormatareFisier.coada_pachete[0]=pachet_start
-        FormatareFisier.coada_pachete[len(FormatareFisier.coada_pachete) + 1]=pachet_stop
+        return p
+
 
     @staticmethod
     def siruri_egale(s1, s2):
@@ -98,7 +97,6 @@ class FormatareFisier:
 class Thread_Prelucrare(Thread):
     # creez o variabila de conditie pentru sincronizarea thread-ului de citire
     stare_citire = Condition()
-    coada_fisiere = [] # coada ce ca contine caile catre fisierele de citit
     coada_pachete = [] # coada ce va contine continutul fisierelor prelucrate
 
     def __init__(self):
@@ -111,34 +109,27 @@ class Thread_Prelucrare(Thread):
         while True:
             # primesc lock
             Thread_Prelucrare.stare_citire.acquire()
-            # astept cat coada e vida
-            if len(Thread_Prelucrare.coada_fisiere) == 0:
-                Thread_Prelucrare.stare_citire.wait()
-            # daca in coada se adauga un fisier pornesc imediat sa il prelucrez
-            if len(Thread_Prelucrare.coada_fisiere):
-                # scot din coada prima cale spre un fisier
-                cale = Thread_Prelucrare.coada_fisiere.pop(0)
-                # retin calea pentru impachetarea pachetelor de start si stop
-                sir = FormatareFisier.read_file(cale)
-                # prelucrez si pun in coada pachetul de start
-                s = FormatareFisier.add_ends(cale, 1)
-                # adaug pachetul de start
-                Thread_Prelucrare.coada_pachete = Thread_Prelucrare.coada_pachete + [s]
-                # prelucrez continutul fisierului
-                pachete = FormatareFisier.format_file(sir)
-                # pun in coada de pachete
-                Thread_Prelucrare.coada_pachete = Thread_Prelucrare.coada_pachete + pachete
-                # dupa ce am pus toate pachetele corespunzatoare, adaug pachetul de stop
-                s = FormatareFisier.add_ends(cale, 2)
-                # adaug pachetul de stop
-                Thread_Prelucrare.coada_pachete = Thread_Prelucrare.coada_pachete + [s]
-                # verific daca am conexiunea pe socket deschisa
-                if Socket.flag:
-                    #  anunt thread-ul de trimitere ca poate sa isi inceapa treaba
-                    ts.Thread_Trimitere.stare_trimitere.acquire()
-                    ts.Thread_Trimitere.stare_trimitere.notify()
-                    # eliberare lock
-                    ts.Thread_Trimitere.stare_trimitere.release()
+            cale = FormatareFisier.cale_fisier
+            # retin calea pentru impachetarea pachetelor de start si stop
+            sir = FormatareFisier.read_file(cale)
+            # prelucrez continutul fisierului
+            Thread_Prelucrare.coada_pachete = FormatareFisier.format_file(sir)
+            # prelucrez si pun in coada pachetul de start
+            s = FormatareFisier.add_ends(1)
+            # adaug pachetul de start
+            Thread_Prelucrare.coada_pachete = [s] + Thread_Prelucrare.coada_pachete
+            # dupa ce am pus toate pachetele corespunzatoare, adaug pachetul de stop
+            s = FormatareFisier.add_ends(2)
+            # adaug pachetul de stop
+            Thread_Prelucrare.coada_pachete = Thread_Prelucrare.coada_pachete + [s]
+            # verific daca am conexiunea pe socket deschisa
+            if Socket.flag:
+                #  anunt thread-ul de trimitere ca poate sa isi inceapa treaba
+                ts.Thread_Trimitere.stare_trimitere.acquire()
+                ts.Thread_Trimitere.stare_trimitere.notify()
+                # eliberare lock
+                ts.Thread_Trimitere.stare_trimitere.release()
             # eliberare lock
             Thread_Prelucrare.stare_citire.release()
+
 
