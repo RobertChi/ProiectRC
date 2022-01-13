@@ -6,10 +6,10 @@ from threading import Condition
 from select import select
 
 
-
 class Thread_Trimitere_ACK(Thread):
     # variabila de cond ce o sa imi spuna cand incep sa trimit
     stare_ACK = Condition()
+
     coada_ACK = []  # coada in care voi adauga ACK pentru trimitere
     trimit_ACK = False # pentru partea de pierdere a pachetelor
     ultima_ACK = ['%0%'] # retin ultimul ACK trimis pt partea de duplicat
@@ -17,12 +17,10 @@ class Thread_Trimitere_ACK(Thread):
     am_t_d = False # flag care imi spune daca am oprit sau nu trimiterea
 
     def __init__(self, interfata):
-        # apelez constructorul din clasa parinte
         super(Thread_Trimitere_ACK, self).__init__()
         self.i=interfata
 
     def run(self):
-        # astept
         while True:
             # primesc lock
             Thread_Trimitere_ACK.stare_ACK.acquire()
@@ -78,6 +76,7 @@ class Thread_Trimitere_ACK(Thread):
                         # eliberez lock
                 Thread_Trimitere_ACK.stare_ACK.release()
 
+
     # functie pentru ACK netrimise
     def ACK_netrimise(self):
         # verific daca flagul este setat pe TRUE, pentru a stii daca la un moment dat
@@ -85,8 +84,7 @@ class Thread_Trimitere_ACK(Thread):
         if  not(Thread_Trimitere_ACK.trimit_ACK):
             # daca nu e oprita, arunc cu banul
             Thread_Trimitere_ACK.trimit_ACK=ps.PreluareSiruri.trimit_sau_nu()
-            # daca deja am hotarat ca nu mai trimit pachete,
-            # nu mai apelez functia
+            # daca deja am hotarat ca nu mai trimit pachete, nu mai apelez functia
             print(Thread_Trimitere_ACK.trimit_ACK)
             if Thread_Trimitere_ACK.trimit_ACK:
                 # daca am oprit trimiterea ACK, mut tot in coada de ACK netrimise

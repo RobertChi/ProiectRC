@@ -1,27 +1,27 @@
 from tkinter import messagebox
-import Interfata
-
+# import Interfata
+# from Interfata import Interfata
 class info_interfata:
 
-    port_sender=0
-    port_reciever=0
-    threshold=0
-    prob_pierdere=0
-    dim_pachete=0
-    ip_sender=0
-    ip_reciever=0
+    # port_sender=0
+    # port_reciever=0
+    # threshold=0
+    # prob_pierdere=0
+    # dim_pachete=0
+    # ip_sender=0
+    # ip_reciever=0
 
 
-    def __init__(self):
-        #preluam toate valorile din casetele din interfata
-
-        self.port_sender=Interfata.text_port_sender.get()
-        self.port_reciever=Interfata.text_port_reciever.get()
-        self.threshold=Interfata.text_threshold.get()
-        self.prob_pierdere=Interfata.text_pierdere_pack.get()
-        self.dim_pachete=Interfata.text_dimensiune_pack.get()
-        self.ip_sender=Interfata.text_ip_sender.get()
-        self.ip_reciever=Interfata.text_ip_reciever.get()
+    # def __init__(self):
+    #     #preluam toate valorile din casetele din interfata
+    #
+    #     self.port_sender=Interfata.text_port_sender.get()
+    #     self.port_reciever=Interfata.text_port_reciever.get()
+    #     self.threshold=Interfata.text_threshold.get()
+    #     self.prob_pierdere=Interfata.text_pierdere_pack.get()
+    #     self.dim_pachete=Interfata.text_dimensiune_pack.get()
+    #     self.ip_sender=Interfata.text_ip_sender.get()
+    #     self.ip_reciever=Interfata.text_ip_reciever.get()
 
     @staticmethod
     def check_port(sir):

@@ -11,6 +11,7 @@ from info_interfata import *
 class Interfata:
     port = [0, 0]
     ip = [0,0]
+    stare_interfata = 0
 
     def __init__(self):
         #interfata
@@ -81,9 +82,13 @@ class Interfata:
 
 
         #BUTON START
-
         self.buton_start = Button(self.i, text="Start",bg='green', fg='white', font=('Times New Roman', 12, 'bold'), width=33, height=1,command=self.call_start)
 
+
+        self.buton_sender = Button(self.i, text="Seteaza Sender", bg='gray', fg='white', font=('Times New Roman', 12, 'bold'),width=33, height=1, command=self.call_sender)
+
+
+        self.buton_reciever = Button(self.i, text="Seteaza Reciever", bg='gray', fg='white', font=('Times New Roman', 12, 'bold'), width=33, height=1, command=self.call_reciever)
 
         #BUTON STOP
         self.buton_stop= Button(self.i, text='Stop', bg='red', fg='white', font=('Times New Roman',12,'bold'),width=33, height=1)
@@ -127,8 +132,11 @@ class Interfata:
 
         #buton start/stop/browse
         self.buton_browse.place(x=1030,y=200)
-        self.buton_start.place(x=310, y=310)
-        self.buton_stop.place(x=630,y=310)
+        self.buton_start.place(x=310, y=350)
+        self.buton_stop.place(x=630,y=350)
+
+        self.buton_sender.place(x=310, y=310)
+        self.buton_reciever.place(x=630, y=310)
 
     def call_start(self):
 
@@ -150,14 +158,25 @@ class Interfata:
         Interfata.ip[0] = self.text_ip_sender.get()
         Interfata.ip[1] = self.text_ip_reciever.get()
 
-        Socket.initializare()
+        if (Interfata.stare_interfata==1):
+            Socket.initializare_sender()
 
+        if (Interfata.stare_interfata==2):
+            Socket.initializare_reciever()
 
+    def call_sender(self):
+        Interfata.stare_interfata = 1
+        self.text_box_sender.insert(END, '\nInterfata a fost setata sa fie de tip SENDER')
 
+    def call_reciever(self):
+        Interfata.stare_interfata = 2
+        self.text_box_sender.insert(END, '\nInterfata a fost setata sa fie de tip RECIEVER')
 
     def start_interface(self):
         # interfata
         self.i.mainloop()
+
+
 
 
     def file_opener(self):
@@ -169,6 +188,7 @@ class Interfata:
             FormatareFisier.cale_fisier=self.cale
             #output confirmare deschidere fisier
             self.text_box_sender.insert(END,'Fisierul s-a deschis cu succes!\tCalea:\n'+self.cale+'\n')
+
 
     def getIPs(self):
         #rulam comanda ipconfig in consola

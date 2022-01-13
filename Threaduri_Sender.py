@@ -166,6 +166,7 @@ class Thread_Primire(Thread):
             # eliberez lock
             Thread_Primire.stare_primire.release()
 
+
 class Thread_Prelucrare_ACK(Thread):
     # var de cond pentru sincronizare thread
     stare_prelucrare_ACK = Condition()
@@ -218,3 +219,5 @@ def partea_ACK_duplicat(sir):
         # daca nu am introduc in coada si resetez contorul
         Thread_Primire.ultima_ACK[1] = sir
         Thread_Primire.ultima_ACK[0] = 0
+
+
