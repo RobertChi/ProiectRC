@@ -22,7 +22,7 @@ class Socket:
         # creez socket-ul
         Socket.UDPServerSocket = socket.socket(family=socket.AF_INET,type=socket.SOCK_DGRAM)
 
-        port = int(it.Interfata.port[0])
+        port = (int)(it.Interfata.port[0])
         Socket.UDPServerSocket.bind((it.Interfata.ip[0], port))
 
         # start threaduri

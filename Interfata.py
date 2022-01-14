@@ -10,7 +10,7 @@ import FormatareFisier
 
 class Interfata:
     port = [0, 0]
-    ip = [0,0]
+    ip = ["",""]
     stare_interfata=0
 
     def __init__(self):
@@ -49,17 +49,17 @@ class Interfata:
         # IP/PORT SENDER
         self.label_port_sender = Label(self.i, text='Port sursa', bg='lightgray', fg='Black', font=('Times New Roman', 12, 'bold'))
         self.text_port_sender = Entry(self.i, bg='white', fg='gray', font=('Times New Roman', 12, 'bold'))
-        self.label_ip_sender = Label(self.i, text='IP sursa', bg='lightgray', fg='Black', font=('Times New Roman', 12, 'bold'))
-        self.text_ip_sender = ttk.Combobox(self.i, textvariable='Ip Sursa')
-        self.text_ip_sender['values'] = self.listOfIP
+        #self.label_ip_sender = Label(self.i, text='IP sursa', bg='lightgray', fg='Black', font=('Times New Roman', 12, 'bold'))
+        #self.text_ip_sender = ttk.Combobox(self.i, textvariable='Ip Sursa')
+        #self.text_ip_sender['values'] = self.listOfIP
 
 
         # IP/PORT RECIEVER
         self.label_port_reciever = Label(self.i, text='Port destinatie', bg='lightgray', fg='Black', font=('Times New Roman', 12, 'bold'))
         self.text_port_reciever = Entry(self.i, bg='white', fg='gray', font=('Times New Roman', 12, 'bold'))
-        self.label_ip_reciever = Label(self.i, text='IP destinatie', bg='lightgray', fg='Black', font=('Times New Roman', 12, 'bold'))
-        self.text_ip_reciever = ttk.Combobox(self.i, textvariable='Ip Destinatie')
-        self.text_ip_reciever['values'] = self.listOfIP
+        #self.label_ip_reciever = Label(self.i, text='IP destinatie', bg='lightgray', fg='Black', font=('Times New Roman', 12, 'bold'))
+        #self.text_ip_reciever = ttk.Combobox(self.i, textvariable='Ip Destinatie')
+        #self.text_ip_reciever['values'] = self.listOfIP
 
 
         #labeluri si casete text mari pentru SENDER si RECIEVER
@@ -104,8 +104,8 @@ class Interfata:
         #casete text pentru sender
         self.label_port_sender.place(x=20, y=130)
         self.text_port_sender.place(x=130, y=130)
-        self.label_ip_sender.place(x=20, y=100)
-        self.text_ip_sender.place(x=130, y=100)
+#        self.label_ip_sender.place(x=20, y=100)
+#        self.text_ip_sender.place(x=130, y=100)
         self.text_box_sender.place(x=310, y=45)
         self.label_sender.place(x=430, y=20)
 
@@ -115,8 +115,8 @@ class Interfata:
         #casete text pentru reciever
         self.label_port_reciever.place(x=20, y=190)
         self.text_port_reciever.place(x=130, y=190)
-        self.label_ip_reciever.place(x=20, y=160)
-        self.text_ip_reciever.place(x=130, y=160)
+#        self.label_ip_reciever.place(x=20, y=160)
+#        self.text_ip_reciever.place(x=130, y=160)
         self.text_box_reciever.place(x=630, y=45)
         self.label_reciever.place(x=740, y=20)
 
@@ -152,8 +152,8 @@ class Interfata:
             self.text_port_reciever.delete(0, END)
             return
 
-        Interfata.ip[0] = self.text_ip_sender.get()
-        Interfata.ip[1] = self.text_ip_reciever.get()
+        Interfata.ip[0] = "127.0.0.1"
+        Interfata.ip[1] = "127.0.0.1"
 
         if(Interfata.stare_interfata==1):
             Socket.Socket.initializare_sender()

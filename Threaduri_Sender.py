@@ -13,7 +13,6 @@ class Thread_Trimitere(Thread):
     stare_trimitere = Condition()
 
     def __init__(self):
-        # apelez constructorul din clasa parinte
         super(Thread_Trimitere, self).__init__()
 
     def run(self):
@@ -38,7 +37,7 @@ class Thread_Trimitere(Thread):
                     s = ff.Thread_Prelucrare.coada_pachete.pop(0)
                     # trimit
                     port = it.Interfata.port[1]
-                    Socket.Socket.UDPServerSocket.sendto(bytearray(s.encode('utf-8')),(Socket.Socket.localIP,(int)(port)))
+                    Socket.Socket.UDPServerSocket.sendto(bytearray(s.encode('utf-8')),(it.Interfata.ip[1],(int)(port)))
                     # daca am in coada preiau din aceasta doar cate imi spune cwnd
 
                     # mai intai verific daca in coada nu sunt mai putine pachete decat dim
