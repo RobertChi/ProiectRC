@@ -1,4 +1,4 @@
-from Interfata import Interfata
+import Interfata
 from tkinter import *
 import random
 from threading import Thread
@@ -23,12 +23,12 @@ class PreluareSiruri:
             PreluareSiruri.numar_transmitii=sir[1]
 
             #scriem in text_box
-            Interfata.text_box_reciever.insert(END,'Pachetul de START a fost primit.\nSunt de primit '+sir[1]+' pachete.')
+            Interfata.Interfata.text_box_reciever.insert(END,'Pachetul de START a fost primit.\nSunt de primit '+sir[1]+' pachete.')
 
         #daca primu subsir este STOP
         if(sir[0]=='STOP'):
             #scriem in text_box
-            Interfata.text_box_reciever.insert(END,'Pachetul de STOP a fost primit.\nS-au trimis '+sir[1]+' caractere.')
+            Interfata.Interfata.text_box_reciever.insert(END,'Pachetul de STOP a fost primit.\nS-au trimis '+sir[1]+' caractere.')
 
 
         #daca if-urile anterioare nu se indeplinesc inseamna ca avem un pachet normal
@@ -42,8 +42,8 @@ class PreluareSiruri:
     @staticmethod
     def trimit_sau_nu():
         # scot probabiliatea introdusa
-        p = Interfata.probabilitatea[0]
-        print('p=' + str(Interfata.probabilitatea))
+        p = Interfata.Interfata.probabilitatea[0]
+        print('p=' + str(Interfata.Interfata.probabilitatea))
         # generez aleator un nr
         nr = random.random()
         # verific unde se situeaza acesta fata de probabilitatea

@@ -1,10 +1,10 @@
 from threading import Thread
 from threading import Condition
-from Socket import Socket
+import Socket
 import Threaduri_Sender as ts
 
 class FormatareFisier:
-    cale_fisier=''
+    cale_fisier = ''
     dimensiune_sir=2
     numar_secventa=0
     coada_pachete=[]
@@ -98,6 +98,7 @@ class Thread_Prelucrare(Thread):
     # creez o variabila de conditie pentru sincronizarea thread-ului de citire
     stare_citire = Condition()
     coada_pachete = [] # coada ce va contine continutul fisierelor prelucrate
+    fisier_deschis=False
 
     def __init__(self):
         # apelez constructor din clasa parinte
@@ -109,26 +110,32 @@ class Thread_Prelucrare(Thread):
         while True:
             # primesc lock
             Thread_Prelucrare.stare_citire.acquire()
-            cale = FormatareFisier.cale_fisier
+
+            if (Thread_Prelucrare.fisier_deschis==False):
+                Thread_Prelucrare.stare_citire.wait()
             # retin calea pentru impachetarea pachetelor de start si stop
-            sir = FormatareFisier.read_file(cale)
-            # prelucrez continutul fisierului
-            Thread_Prelucrare.coada_pachete = FormatareFisier.format_file(sir)
-            # prelucrez si pun in coada pachetul de start
-            s = FormatareFisier.add_ends(1)
-            # adaug pachetul de start
-            Thread_Prelucrare.coada_pachete = [s] + Thread_Prelucrare.coada_pachete
-            # dupa ce am pus toate pachetele corespunzatoare, adaug pachetul de stop
-            s = FormatareFisier.add_ends(2)
-            # adaug pachetul de stop
-            Thread_Prelucrare.coada_pachete = Thread_Prelucrare.coada_pachete + [s]
-            # verific daca am conexiunea pe socket deschisa
-            if Socket.flag:
-                #  anunt thread-ul de trimitere ca poate sa isi inceapa treaba
-                ts.Thread_Trimitere.stare_trimitere.acquire()
-                ts.Thread_Trimitere.stare_trimitere.notify()
-                # eliberare lock
-                ts.Thread_Trimitere.stare_trimitere.release()
+            if(Thread_Prelucrare.fisier_deschis==True):
+                Thread_Prelucrare.fisier_deschis=False
+                cale = FormatareFisier.cale_fisier
+                sir = FormatareFisier.read_file(cale)
+                # prelucrez continutul fisierului
+                Thread_Prelucrare.coada_pachete = FormatareFisier.format_file(sir)
+                # prelucrez si pun in coada pachetul de start
+                s = FormatareFisier.add_ends(1)
+                # adaug pachetul de start
+                Thread_Prelucrare.coada_pachete = [s] + Thread_Prelucrare.coada_pachete
+                # dupa ce am pus toate pachetele corespunzatoare, adaug pachetul de stop
+                s = FormatareFisier.add_ends(2)
+                # adaug pachetul de stop
+                Thread_Prelucrare.coada_pachete = Thread_Prelucrare.coada_pachete + [s]
+                # verific daca am conexiunea pe socket deschisa
+                if Socket.Socket.flag:
+                    #  anunt thread-ul de trimitere ca poate sa isi inceapa treaba
+                    ts.Thread_Trimitere.stare_trimitere.acquire()
+                    ts.Thread_Trimitere.stare_trimitere.notify()
+                    # eliberare lock
+                    ts.Thread_Trimitere.stare_trimitere.release()
+
             # eliberare lock
             Thread_Prelucrare.stare_citire.release()
 

@@ -1,5 +1,5 @@
 import Interfata as it
-from Socket import Socket
+import Socket
 import PreluareSiruri as ps
 from threading import Thread
 from threading import Condition
@@ -46,7 +46,7 @@ class Thread_Trimitere_ACK(Thread):
                     print("Trimit "+ sir)
                     string='%'+string +'%'
                     port = it.Interfata.port[0]
-                    Socket.UDPServerSocket.sendto(bytearray(string.encode('utf-8')),
+                    Socket.Socket.UDPServerSocket.sendto(bytearray(string.encode('utf-8')),
                                                             (it.Interfata.ip[0], port))
                     # actualizez ultima ACK
                     Thread_Trimitere_ACK.ultima_ACK.insert(0 , string)
@@ -65,7 +65,7 @@ class Thread_Trimitere_ACK(Thread):
                     for i in range(0, 4):
                         print("TRIMIT " + string) # debug
                         # trimit pe socket
-                        Socket.UDPServerSocket.sendto(bytearray(string.encode('utf-8')),
+                        Socket.Socket.UDPServerSocket.sendto(bytearray(string.encode('utf-8')),
                                                                 (it.Interfata.ip[0], port))
                         # actualizez contorul
                         Thread_Trimitere_ACK.coada_index[0] = Thread_Trimitere_ACK.coada_index[0] + 1
@@ -115,16 +115,16 @@ class Thread_Primire_Date(Thread):
             # primesc lock
             Thread_Primire_Date.stare_primire_date.acquire()
             # verific daca s-a apasat pe start
-            if not Socket.flag:
+            if not Socket.Socket.flag:
                 # astept
                 Thread_Primire_Date.stare_primire_date.wait()
             # Apelam la functia sistem IO -select- pentru a verifca daca socket-ul are date in bufferul de receptia
-            r, _, _ = select([Socket.UDPServerSocket], [], [], 1)
+            r = select([Socket.Socket.UDPServerSocket], [], [], 1)
 
             # scot date de pe socket
             if r:
                 # primesc pe socket
-                data, address = Socket.UDPServerSocket.recvfrom(Socket.bufferSize)
+                data, address = Socket.Socket.UDPServerSocket.recvfrom(Socket.Socket.bufferSize)
                 # daca am blocata trimiterea, verific daca pot sa deblochez trimiterea
                 Thread_Primire_Date.buffer_socket.append(str(data))
                 if (Thread_Trimitere_ACK.trimit_ACK):
@@ -142,8 +142,6 @@ class Thread_Primire_Date(Thread):
 
                 sir = ps.PreluareSiruri.nr_pachet(str(data))
                 self.interfata.update_label_packet(sir)
-                print('buffer')
-                print(Thread_Primire_Date.buffer_socket)
             Thread_Primire_Date.stare_primire_date.release()
 
     def deblocare_trimitere(self, sir ):
@@ -151,9 +149,4 @@ class Thread_Primire_Date(Thread):
         # daca primesc ceva de la emitator deblochez trimiterea
         Thread_Trimitere_ACK.trimit_ACK = False
         # debug
-        print(' Din fct de deblocare coada de pachete arata :')
-        print(Thread_Primire_Date.coada_pachete)
-        print(Thread_Trimitere_ACK.trimit_ACK)
-        print("coada ACK")
-        print(Thread_Trimitere_ACK.coada_ACK)
 

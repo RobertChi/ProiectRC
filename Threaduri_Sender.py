@@ -4,7 +4,7 @@ import select
 import FormatareFisier as ff
 import Tahoe_Alg as ta
 import Interfata as it
-from Socket import Socket
+import Socket
 
 
 
@@ -38,7 +38,7 @@ class Thread_Trimitere(Thread):
                     s = ff.Thread_Prelucrare.coada_pachete.pop(0)
                     # trimit
                     port = it.Interfata.port[1]
-                    Socket.UDPServerSocket.sendto(bytearray(s.encode('utf-8')),(it.Interfata.ip[1], port))
+                    Socket.Socket.UDPServerSocket.sendto(bytearray(s.encode('utf-8')),(Socket.Socket.localIP,(int)(port)))
                     # daca am in coada preiau din aceasta doar cate imi spune cwnd
 
                     # mai intai verific daca in coada nu sunt mai putine pachete decat dim
@@ -69,7 +69,7 @@ class Thread_Trimitere(Thread):
                     # scot din coada
                     string = coada_trimis.pop(0)
                     # trimit pe socket
-                    Socket.UDPServerSocket.sendto(bytearray(string.encode('utf-8')),(it.Interfata.ip[1], port))
+                    Socket.Socket.UDPServerSocket.sendto(bytearray(string.encode('utf-8')),(it.Interfata.ip[1], port))
                     #TODO Afisare in caseta text sender
 
             # in cazul in care am elemente in coada de retransmisie si pachetele deja trimise au primit ACK, trimit pachetele din coada de retransmisie
@@ -101,7 +101,7 @@ class Thread_Trimitere(Thread):
                 #trimitem din coada de trimis
                 for i in range(0, len(coada_trimis)):
                     string = coada_trimis.pop(0)
-                    Socket.UDPServerSocket.sendto(bytearray(string.encode('utf-8')),(it.Interfata.ip[1], port))
+                    Socket.Socket.UDPServerSocket.sendto(bytearray(string.encode('utf-8')),(it.Interfata.ip[1], port))
                     #TODO afisare caseta sender (string)
 
                 #daca coada de retransimisie este nula
@@ -129,19 +129,19 @@ class Thread_Primire(Thread):
             # primesc lock
             Thread_Primire.stare_primire.acquire()
             # verific daca s-a apasat pe butonul de start
-            if not Socket.flag:
+            if not Socket.Socket.flag:
                 # nu s-a apasat inca butonul de start si astept
                 Thread_Primire.stare_primire.wait()
 
             # Apelam la functia sistem IO -select- pentru a verifca daca socket-ul are date in bufferul de receptie
             # Stabilim un timeout de 1 secunda
-            r = select.select([Socket.UDPServerSocket], [], [], 1)
+            r = select.select([Socket.Socket.UDPServerSocket], [], [], 1)
             if not r:
                 # incrementez un contor care sa imi spuna cat am asteptat pana am primit ceva
                 contor = contor + 1
             else:
                 # primesc ceva pe socket
-                data, address = Socket.UDPServerSocket.recvfrom(Socket.bufferSize)
+                data, address = Socket.Socket.UDPServerSocket.recvfrom(Socket.Socket.bufferSize)
                 # preia data primita ca fiind string
                 sir=str(data)
                 # prelucrez informatia, tiind cont de formatul ei de pe socket

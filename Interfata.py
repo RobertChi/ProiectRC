@@ -1,16 +1,17 @@
 from tkinter import *
 import tkinter as tk
-from tkinter import ttk
+from tkinter import ttk, messagebox
 from tkinter import filedialog
-from Socket import Socket
+import Socket
 import subprocess
+import info_interfata as ii
 import FormatareFisier
-from info_interfata import *
 
 
 class Interfata:
     port = [0, 0]
     ip = [0,0]
+    stare_interfata=0
 
     def __init__(self):
         #interfata
@@ -84,13 +85,16 @@ class Interfata:
 
         self.buton_start = Button(self.i, text="Start",bg='green', fg='white', font=('Times New Roman', 12, 'bold'), width=33, height=1,command=self.call_start)
 
-
+        self.buton_sender = Button(self.i, text="Set SENDER", bg='gray', fg='white', font=('Times New Roman', 12, 'bold'),
+                                  width=33, height=1, command=self.set_sender)
+        self.buton_reciever = Button(self.i, text="Set RECIEVER", bg='gray', fg='white', font=('Times New Roman', 12, 'bold'),
+                                  width=33, height=1, command=self.set_reciever)
         #BUTON STOP
-        self.buton_stop= Button(self.i, text='Stop', bg='red', fg='white', font=('Times New Roman',12,'bold'),width=33, height=1)
+        self.buton_stop= Button(self.i, text='Stop', bg='red', fg='white', font=('Times New Roman',12,'bold'),width=33, height=1, command=self.call_stop)
 
 
         #BUTON BROWSE
-        self.buton_browse = Button(self.i, text='BROWSE', fg='white', bg='gray',width=18, height=2, command=lambda: self.file_opener())
+        self.buton_browse = self.browse(1030,200)
 
         #apelam functia care plaseaza butoanele si casetele
         self.open_ui()
@@ -125,22 +129,23 @@ class Interfata:
         self.label_dimensiune_pack.place(x=950, y=160)
         self.text_dimensiune_pack.place(x=1100,y=160)
 
-        #buton start/stop/browse
-        self.buton_browse.place(x=1030,y=200)
-        self.buton_start.place(x=310, y=310)
-        self.buton_stop.place(x=630,y=310)
+        #buton start/stop
+        self.buton_start.place(x=310, y=350)
+        self.buton_stop.place(x=630,y=350)
+        self.buton_sender.place(x=310, y=310)
+        self.buton_reciever.place(x=630, y=310)
 
     def call_start(self):
 
         p1 = self.text_port_sender.get()
-        if info_interfata.check_port(p1):
+        if ii.info_interfata.check_port(p1):
             Interfata.port[0] = p1
         else:
             self.text_port_sender.delete(0, END)
             return
         #
         p2 = self.text_port_reciever.get()
-        if info_interfata.check_port(p2):
+        if ii.info_interfata.check_port(p2):
             nr2 = p2
             Interfata.port[1] = nr2
         else:
@@ -150,25 +155,50 @@ class Interfata:
         Interfata.ip[0] = self.text_ip_sender.get()
         Interfata.ip[1] = self.text_ip_reciever.get()
 
-        Socket.initializare()
+        if(Interfata.stare_interfata==1):
+            Socket.Socket.initializare_sender()
+
+        if(Interfata.stare_interfata==2):
+            Socket.Socket.initializare_reciever()
+
+    def call_stop(self):
+        Socket.Socket.UDPServerSocket.shutdown()
+        exit()
 
 
+    def set_sender(self):
+        Interfata.stare_interfata=1
+        self.text_box_sender.insert(END, 'Interfata a fost setata ca fiind SENDER\n')
 
+    def set_reciever(self):
+        Interfata.stare_interfata=2
+        self.text_box_reciever.insert(END,'Interfata a fost setata ca fiind RECIEVER\n')
 
     def start_interface(self):
         # interfata
         self.i.mainloop()
 
+    def browse(self,x,y):
+        bttn = Button(self.i, text='BROWSE', fg='white', bg='gray', width=18, height=2,
+                                   command=lambda: self.file_opener())
+        bttn.place(x=x,y=y)
+        return bttn
 
     def file_opener(self):
-        file = filedialog.askopenfile(mode='r', filetypes=[('Text Files', '*.txt')])
+        file = filedialog.askopenfile(initialdir="C:/Users/rober/Desktop/Proiecte/ProiectRC/fisiere/")
         if file:
             #salvam calea catre fisier
             self.cale=file.name
             #copiem calea in clasa care prelucreaza fisierul
-            FormatareFisier.cale_fisier=self.cale
-            #output confirmare deschidere fisier
-            self.text_box_sender.insert(END,'Fisierul s-a deschis cu succes!\tCalea:\n'+self.cale+'\n')
+            FormatareFisier.FormatareFisier.cale_fisier=self.cale
+            FormatareFisier.Thread_Prelucrare.fisier_deschis=True
+
+            self.text_box_sender.insert(END, 'Fisierul s-a deschis cu succes!\tCalea:\n' + self.cale + '\n')
+
+            FormatareFisier.Thread_Prelucrare.stare_citire.acquire()
+            FormatareFisier.Thread_Prelucrare.stare_citire.notify()
+            FormatareFisier.Thread_Prelucrare.stare_citire.release()
+
 
     def getIPs(self):
         #rulam comanda ipconfig in consola
